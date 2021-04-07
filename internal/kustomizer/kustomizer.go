@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -27,6 +28,8 @@ func FromFS(folder string) *Kustomizer {
 		Deserializer: scheme.Codecs.UniversalDeserializer(),
 	}
 }
+
+var namespaceMatcher = regexp.MustCompile(`(namespace:).*\n`)
 
 func (kzr *Kustomizer) ParseYAML() error {
 	return filepath.Walk(kzr.Folder, func(path string, info os.FileInfo, e error) error {
@@ -86,7 +89,9 @@ func (kzr *Kustomizer) AddYAML(ypath string, data []byte) error {
 func (kzr *Kustomizer) addResource(ypath string, data []byte) {
 	p := strings.ReplaceAll(ypath, kzr.Folder, ".")
 	kzr.Output.Resources = append(kzr.Output.Resources, p)
-	kzr.Output.ResourcesData[p] = string(data)
+	d := string(data)
+	d = namespaceMatcher.ReplaceAllString(d, "")
+	kzr.Output.ResourcesData[p] = d
 }
 
 func (kzr *Kustomizer) inspect(data []byte) (out [][]byte, mixed bool, err error) {

@@ -9,6 +9,7 @@ Converts Kubernetes YAML files to Kustomize
 ## Output details
 
 - Files with mixed types of resources will be added to `$.resources` and will not be transformed in any way
+- Files added to `$.resources` will have the property `$.namespace` removed, as it is defined in the `kustomization.yaml`
 - Files with one or more `Secret` resources will be added to `$.secretGenerator` and will be transformed
 - Files with one or more `ConfigMap` resources will be added to `$.configMapGenerator` and will be transformed
 - `ConfigMap` and `Secret` with multi-line entries will be exported as a file to `$.[generator].files`
@@ -19,7 +20,7 @@ Converts Kubernetes YAML files to Kustomize
 ### Example output file and folder structure
 
 ```
-# files do not have "transformable" .kind
+# resources which are neither secrets or config maps
 - api/
   - deployment.yaml
   - reader.yaml
