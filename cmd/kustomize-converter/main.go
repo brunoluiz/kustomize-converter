@@ -13,8 +13,9 @@ import (
 )
 
 type Config struct {
-	Folder       *string
-	OutputFolder *string
+	Folder           *string
+	OutputFolder     *string
+	EnableGenerators *bool
 }
 
 func main() {
@@ -22,9 +23,9 @@ func main() {
 	fs := flag.NewFlagSet("kustomize-converter", flag.ExitOnError)
 	c.Folder = fs.String("folder", "", "kubernetes manifests folder")
 	c.OutputFolder = fs.String("output-folder", "", "output folder (can be the same as --folder)")
+	c.EnableGenerators = fs.Bool("generators", true, "toggle secret and configMapGenerator transforms")
 
-	err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix())
-	if err != nil {
+	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
 		log.Fatal(err)
 	}
 
@@ -34,7 +35,7 @@ func main() {
 }
 
 func run(ctx context.Context, c Config) error {
-	k := kustomizer.FromFS(*c.Folder)
+	k := kustomizer.FromFS(*c.Folder, *c.EnableGenerators)
 	w := writer.FS{Folder: *c.OutputFolder}
 
 	if err := k.ParseYAML(); err != nil {

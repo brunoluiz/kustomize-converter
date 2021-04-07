@@ -19,13 +19,15 @@ type Kustomizer struct {
 	Folder       string
 	Output       *Kustomize
 	Deserializer runtime.Decoder
+	generators   bool
 }
 
-func FromFS(folder string) *Kustomizer {
+func FromFS(folder string, generators bool) *Kustomizer {
 	return &Kustomizer{
 		Folder:       folder,
 		Output:       NewKustomize(),
 		Deserializer: scheme.Codecs.UniversalDeserializer(),
+		generators:   generators,
 	}
 }
 
@@ -57,8 +59,9 @@ func (kzr *Kustomizer) AddYAML(ypath string, data []byte) error {
 		return err
 	}
 
-	// If it is a mixed manifest definitions (different .Kind tags), don't do anything
-	if mixed {
+	// If it is a mixed manifest definitions (different .Kind tags) or generators
+	// are disabled, don't do anything besides listing it in the resources list
+	if mixed || !kzr.generators {
 		kzr.addResource(ypath, data)
 		return nil
 	}
