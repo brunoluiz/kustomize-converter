@@ -31,7 +31,7 @@ func FromFS(folder string, generators bool) *Kustomizer {
 	}
 }
 
-var namespaceMatcher = regexp.MustCompile(`(namespace:).*\n`)
+var namespaceMatcher = regexp.MustCompile(`.*(namespace:).*\n`)
 
 func (kzr *Kustomizer) ParseYAML() error {
 	return filepath.Walk(kzr.Folder, func(path string, info os.FileInfo, e error) error {
