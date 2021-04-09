@@ -91,10 +91,14 @@ func (kzr *Kustomizer) AddYAML(ypath string, data []byte) error {
 
 func (kzr *Kustomizer) addResource(ypath string, data []byte) {
 	p := strings.ReplaceAll(ypath, kzr.Folder, ".")
-	kzr.Output.Resources = append(kzr.Output.Resources, p)
+	if _, ok := kzr.Output.ResourcesData[p]; ok {
+		return
+	}
+
 	d := string(data)
 	d = namespaceMatcher.ReplaceAllString(d, "")
 	kzr.Output.ResourcesData[p] = d
+	kzr.Output.Resources = append(kzr.Output.Resources, p)
 }
 
 func (kzr *Kustomizer) inspect(data []byte) (out [][]byte, mixed bool, err error) {
