@@ -32,7 +32,7 @@ func (w *FS) Write(k *kustomizer.Kustomize) error {
 		return err
 	}
 
-	return ioutil.WriteFile(filepath.Join(w.Folder, "kustomization.yml"), d, 0600)
+	return ioutil.WriteFile(filepath.Join(w.Folder, "kustomization.yaml"), d, 0600)
 }
 
 func (w *FS) writeGenerators(configs []kustomizer.ConfigGenerator) error {
