@@ -1,4 +1,4 @@
-package kustomizer
+package kustomize
 
 import (
 	"fmt"
@@ -9,13 +9,13 @@ import (
 )
 
 type ConfigGenerator struct {
-	Name     string            `yaml:"name"`
-	Envs     []string          `yaml:"envs,omitempty"`
-	Files    []string          `yaml:"files,omitempty"`
-	Path     string            `yaml:"-"`
-	FileDir  string            `yaml:"-"`
-	EnvData  map[string]string `yaml:"-"`
-	FileData map[string]string `yaml:"-"`
+	Name     string            `yaml:"name" json:"name"`
+	Envs     []string          `yaml:"envs,omitempty" json:"envs,omitempty"`
+	Files    []string          `yaml:"files,omitempty" json:"files,omitempty"`
+	Path     string            `yaml:"-" json:"-"`
+	FileDir  string            `yaml:"-" json:"-"`
+	EnvData  map[string]string `yaml:"-" json:"-"`
+	FileData map[string]string `yaml:"-" json:"-"`
 }
 
 func (c *ConfigGenerator) Add(k, v string) {
