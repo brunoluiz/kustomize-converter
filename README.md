@@ -4,7 +4,19 @@ Converts Kubernetes YAML files to Kustomize
 
 ## Running
 
-`kustomize-converter --folder <manifests folder> --output-folder <output folder (can be the as --folder)>`
+```
+Usage of kustomize-converter:
+  --clean
+        if set to true, it will clear up resources from source folder before generating output
+  --folder string
+        kubernetes manifests source folder
+  --generators
+        if set to false, disable secret and configMapGenerator transforms (default true)
+  --namespace string
+        set a kubernetes namespace, instead of trying to infer from files
+  --output-folder string
+        kubernetes manifest output folder (can be the same as --folder)
+```
 
 ## Output details
 
