@@ -87,13 +87,12 @@ func (k *Kustomize) handle(path string, y []byte) {
 
 func (k *Kustomize) addResource(ypath string, data []byte) {
 	p := strings.ReplaceAll(ypath, k.baseFolder, ".")
-	k.ResourcesData[p] = namespaceMatcher.ReplaceAllString(string(data), "")
 
-	if _, ok := k.ResourcesData[p]; ok {
-		return
+	if _, ok := k.ResourcesData[p]; !ok {
+		k.Resources = append(k.Resources, p)
+		k.addProcessed(ypath)
 	}
-	k.Resources = append(k.Resources, p)
-	k.addProcessed(ypath)
+	k.ResourcesData[p] = namespaceMatcher.ReplaceAllString(string(data), "")
 }
 
 type KustomizeOption func(k *Kustomize)
