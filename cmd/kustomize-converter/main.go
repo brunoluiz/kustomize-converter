@@ -19,8 +19,7 @@ func main() {
 		outputFolder     = fs.String("output-folder", "", "output folder (can be the same as --folder)")
 		enableGenerators = fs.Bool("generators", true, "toggle secret and configMapGenerator transforms")
 		namespace        = fs.String("namespace", "", "set a kubernetes namespace, instead of trying to infer from files")
-		clean            = fs.Bool("clean", false, "if 'folder' and 'output-folder' are the same, clean old resources")
-		clearProcessed   = *clean && *folder == *outputFolder
+		clean            = fs.Bool("clean", false, "if set, it will clear up resources from 'folder' before generating new")
 	)
 
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
@@ -31,13 +30,13 @@ func main() {
 		kustomize.WithBaseFolder(*folder),
 		kustomize.WithGenerators(*enableGenerators),
 		kustomize.WithNamespace(*namespace),
-		kustomize.WithProcessedLog(clearProcessed),
+		kustomize.WithProcessedLog(*clean),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := writer.ToFS(*outputFolder, clearProcessed).Write(k); err != nil {
+	if err := writer.ToFS(*outputFolder, *clean).Write(k); err != nil {
 		log.Fatal(err)
 	}
 }

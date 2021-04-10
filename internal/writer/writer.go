@@ -20,6 +20,10 @@ func ToFS(folder string, clearProcessed bool) FS {
 }
 
 func (w FS) Write(k *kustomize.Kustomize) error {
+	if err := w.deleteResources(k.Processed); err != nil {
+		return err
+	}
+
 	if err := w.writeGenerators(k.Secrets); err != nil {
 		return err
 	}
@@ -29,10 +33,6 @@ func (w FS) Write(k *kustomize.Kustomize) error {
 	}
 
 	if err := w.writeResources(k.ResourcesData); err != nil {
-		return err
-	}
-
-	if err := w.deleteResources(k.Processed); err != nil {
 		return err
 	}
 

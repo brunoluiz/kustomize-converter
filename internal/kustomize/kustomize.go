@@ -42,14 +42,14 @@ func (k *Kustomize) addProcessed(p string) {
 }
 
 func (k *Kustomize) AddYAML(ypath string, data []byte) error {
-	yamls, mixed, err := inspect.YAML(data)
+	yamls, handleable, err := inspect.YAML(data)
 	if err != nil {
 		return err
 	}
 
 	// If it is a mixed manifest definitions (different .Kind tags) or generators
 	// are disabled, don't do anything besides listing it in the resources list
-	if mixed || !k.generators {
+	if !handleable || !k.generators {
 		k.addResource(ypath, data)
 		k.addProcessed(ypath)
 		return nil
@@ -87,13 +87,11 @@ func (k *Kustomize) handle(path string, y []byte) {
 
 func (k *Kustomize) addResource(ypath string, data []byte) {
 	p := strings.ReplaceAll(ypath, k.baseFolder, ".")
+	k.ResourcesData[p] = namespaceMatcher.ReplaceAllString(string(data), "")
+
 	if _, ok := k.ResourcesData[p]; ok {
 		return
 	}
-
-	d := string(data)
-	d = namespaceMatcher.ReplaceAllString(d, "")
-	k.ResourcesData[p] = d
 	k.Resources = append(k.Resources, p)
 	k.addProcessed(ypath)
 }
@@ -133,6 +131,7 @@ func NewKustomize(opts ...KustomizeOption) *Kustomize {
 		ResourcesData: map[string]string{},
 		deserializer:  scheme.Codecs.UniversalDeserializer(),
 		generators:    true,
+		processedLog:  false,
 	}
 
 	for _, opt := range opts {

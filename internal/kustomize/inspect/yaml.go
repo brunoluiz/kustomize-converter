@@ -7,8 +7,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func YAML(data []byte) (out [][]byte, mixed bool, err error) {
-	kinds := map[string]bool{}
+var supportedTypes = map[string]bool{"Secret": true, "ConfigMap": true}
+
+func YAML(data []byte) (out [][]byte, handleable bool, err error) {
 	yamls := bytes.Split(data, []byte("\n---"))
 
 	for _, y := range yamls {
@@ -33,10 +34,10 @@ func YAML(data []byte) (out [][]byte, mixed bool, err error) {
 			continue
 		}
 
-		kinds[kind] = true
-
-		out = append(out, y)
+		if _, ok := supportedTypes[kind]; !ok {
+			return yamls, false, nil
+		}
 	}
 
-	return out, len(kinds) > 1, nil
+	return yamls, true, nil
 }
