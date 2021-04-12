@@ -11,7 +11,7 @@ import (
 )
 
 func FromFS(folder string, opts ...kustomize.KustomizeOption) (*kustomize.Kustomize, error) {
-	k := kustomize.NewKustomize(opts...)
+	k := kustomize.New(opts...)
 
 	err := filepath.Walk(folder, func(path string, info os.FileInfo, e error) error {
 		if strings.Contains(path, "kustomization.") {

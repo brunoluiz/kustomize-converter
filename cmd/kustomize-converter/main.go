@@ -20,6 +20,8 @@ func main() {
 		clean            = fs.Bool("clean", false, "if set to true, it will clear up resources from source folder before generating output")
 		enableGenerators = fs.Bool("generators", true, "if set to false, disable secret and configMapGenerator transforms")
 		namespace        = fs.String("namespace", "", "set a kubernetes namespace, instead of trying to infer from files")
+		configsFolder    = fs.String("configs-folder", "configs", "which folder should the ConfigMaps be placed in the output folder")
+		secretsFolder    = fs.String("secrets-folder", "secrets", "which folder should the Secrets be placed in the output folder")
 	)
 
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
@@ -31,6 +33,8 @@ func main() {
 		kustomize.WithGenerators(*enableGenerators),
 		kustomize.WithNamespace(*namespace),
 		kustomize.WithProcessedLog(*clean),
+		kustomize.WithConfigsFolder(*configsFolder),
+		kustomize.WithSecretsFolder(*secretsFolder),
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -41,11 +41,11 @@ func (c *ConfigGenerator) GetEnv() (s string) {
 	return s
 }
 
-func newSecretGenerator(ypath string, obj *corev1.Secret) ConfigGenerator {
+func newSecretGenerator(baseFolder, ypath string, obj *corev1.Secret) ConfigGenerator {
 	secret := ConfigGenerator{
 		Name:     obj.Name,
 		FileDir:  filepath.Dir(ypath),
-		Path:     "secrets",
+		Path:     baseFolder,
 		Envs:     []string{},
 		EnvData:  map[string]string{},
 		FileData: map[string]string{},
@@ -62,11 +62,11 @@ func newSecretGenerator(ypath string, obj *corev1.Secret) ConfigGenerator {
 	return secret
 }
 
-func newConfigMapGenerator(ypath string, obj *corev1.ConfigMap) ConfigGenerator {
+func newConfigMapGenerator(baseFolder, ypath string, obj *corev1.ConfigMap) ConfigGenerator {
 	config := ConfigGenerator{
 		Name:     obj.Name,
 		FileDir:  filepath.Dir(ypath),
-		Path:     "configs",
+		Path:     baseFolder,
 		Envs:     []string{},
 		EnvData:  map[string]string{},
 		FileData: map[string]string{},

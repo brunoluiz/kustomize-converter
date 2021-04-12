@@ -23,6 +23,8 @@ type Kustomize struct {
 	generators    bool              `yaml:"-" json:"-"`
 	processedLog  bool              `yaml:"-" json:"-"`
 	baseFolder    string            `yaml:"-" json:"-"`
+	secretsFolder string            `yaml:"-" json:"-"`
+	configsFolder string            `yaml:"-" json:"-"`
 }
 
 var namespaceMatcher = regexp.MustCompile(`.*(namespace:).*\n`)
@@ -73,10 +75,10 @@ func (k *Kustomize) handle(path string, y []byte) {
 
 	switch obj := res.(type) {
 	case *corev1.Secret:
-		k.Secrets = append(k.Secrets, newSecretGenerator(path, obj))
+		k.Secrets = append(k.Secrets, newSecretGenerator(k.secretsFolder, path, obj))
 		k.setNamespace(obj.Namespace)
 	case *corev1.ConfigMap:
-		k.Configs = append(k.Configs, newConfigMapGenerator(path, obj))
+		k.Configs = append(k.Configs, newConfigMapGenerator(k.configsFolder, path, obj))
 		k.setNamespace(obj.Namespace)
 	default:
 		k.addResource(path, y)
@@ -121,7 +123,19 @@ func WithProcessedLog(c bool) func(k *Kustomize) {
 	}
 }
 
-func NewKustomize(opts ...KustomizeOption) *Kustomize {
+func WithConfigsFolder(f string) func(k *Kustomize) {
+	return func(k *Kustomize) {
+		k.configsFolder = f
+	}
+}
+
+func WithSecretsFolder(f string) func(k *Kustomize) {
+	return func(k *Kustomize) {
+		k.secretsFolder = f
+	}
+}
+
+func New(opts ...KustomizeOption) *Kustomize {
 	k := &Kustomize{
 		Kind:          "Kustomization",
 		APIVersion:    "kustomize.config.k8s.io/v1beta1",
@@ -131,6 +145,8 @@ func NewKustomize(opts ...KustomizeOption) *Kustomize {
 		deserializer:  scheme.Codecs.UniversalDeserializer(),
 		generators:    true,
 		processedLog:  false,
+		secretsFolder: "secrets",
+		configsFolder: "configs",
 	}
 
 	for _, opt := range opts {
