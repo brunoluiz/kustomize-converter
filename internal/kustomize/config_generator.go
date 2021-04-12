@@ -10,6 +10,7 @@ import (
 
 type ConfigGenerator struct {
 	Name     string            `yaml:"name" json:"name"`
+	Type     string            `yaml:"type,omitempty" json:"type,omitempty"`
 	Envs     []string          `yaml:"envs,omitempty" json:"envs,omitempty"`
 	Files    []string          `yaml:"files,omitempty" json:"files,omitempty"`
 	Path     string            `yaml:"-" json:"-"`
@@ -57,6 +58,11 @@ func newSecretGenerator(baseFolder, ypath string, obj *corev1.Secret) ConfigGene
 
 	for k, v := range obj.StringData {
 		secret.Add(k, v)
+	}
+
+	// It is always Opaque by default, but otherwise we might want to change it
+	if obj.Type != corev1.SecretTypeOpaque {
+		secret.Type = string(obj.Type)
 	}
 
 	return secret
