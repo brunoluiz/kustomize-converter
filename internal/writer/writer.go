@@ -92,6 +92,10 @@ func (w FS) deleteResources(resources []string) error {
 
 	for _, res := range resources {
 		if err := os.Remove(res); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+
 			return err
 		}
 	}
