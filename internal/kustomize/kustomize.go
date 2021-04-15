@@ -11,29 +11,21 @@ import (
 )
 
 type Kustomize struct {
-	APIVersion    string            `yaml:"apiVersion" json:"apiVersion"`
-	Kind          string            `yaml:"kind" json:"kind"`
-	Namespace     string            `yaml:"namespace" json:"namespace"`
-	Secrets       []ConfigGenerator `yaml:"secretGenerator,omitempty" json:"secretGenerator,namespace"`
-	Configs       []ConfigGenerator `yaml:"configMapGenerator,omitempty" json:"configMapGenerator,omitempty"`
-	Resources     []string          `yaml:"resources,omitempty" json:"resources,omitempty"`
-	ResourcesData map[string]string `yaml:"-" json:"-"`
-	Processed     []string          `yaml:"-" json:"-"`
-	deserializer  runtime.Decoder   `yaml:"-" json:"-"`
-	generators    bool              `yaml:"-" json:"-"`
-	processedLog  bool              `yaml:"-" json:"-"`
-	baseFolder    string            `yaml:"-" json:"-"`
-	secretsFolder string            `yaml:"-" json:"-"`
-	configsFolder string            `yaml:"-" json:"-"`
-}
-
-var namespaceMatcher = regexp.MustCompile(`.*(namespace:).*\n`)
-
-func (k *Kustomize) setNamespace(n string) {
-	if k.Namespace != "" {
-		return
-	}
-	k.Namespace = n
+	APIVersion       string            `yaml:"apiVersion" json:"apiVersion"`
+	Kind             string            `yaml:"kind" json:"kind"`
+	Namespace        string            `yaml:"namespace" json:"namespace"`
+	Secrets          []ConfigGenerator `yaml:"secretGenerator,omitempty" json:"secretGenerator,namespace"`
+	Configs          []ConfigGenerator `yaml:"configMapGenerator,omitempty" json:"configMapGenerator,omitempty"`
+	Resources        []string          `yaml:"resources,omitempty" json:"resources,omitempty"`
+	ResourcesData    map[string]string `yaml:"-" json:"-"`
+	Processed        []string          `yaml:"-" json:"-"`
+	deserializer     runtime.Decoder   `yaml:"-" json:"-"`
+	generators       bool              `yaml:"-" json:"-"`
+	processedLog     bool              `yaml:"-" json:"-"`
+	baseFolder       string            `yaml:"-" json:"-"`
+	secretsFolder    string            `yaml:"-" json:"-"`
+	configsFolder    string            `yaml:"-" json:"-"`
+	namespaceMatcher *regexp.Regexp    `yaml:"-" json:"-`
 }
 
 func (k *Kustomize) addProcessed(p string) {
@@ -76,10 +68,8 @@ func (k *Kustomize) handle(path string, y []byte) {
 	switch obj := res.(type) {
 	case *corev1.Secret:
 		k.Secrets = append(k.Secrets, newSecretGenerator(k.secretsFolder, path, obj))
-		k.setNamespace(obj.Namespace)
 	case *corev1.ConfigMap:
 		k.Configs = append(k.Configs, newConfigMapGenerator(k.configsFolder, path, obj))
-		k.setNamespace(obj.Namespace)
 	default:
 		k.addResource(path, y)
 	}
@@ -94,7 +84,8 @@ func (k *Kustomize) addResource(ypath string, data []byte) {
 		k.Resources = append(k.Resources, p)
 		k.addProcessed(ypath)
 	}
-	k.ResourcesData[p] = namespaceMatcher.ReplaceAllString(string(data), "")
+
+	k.ResourcesData[p] = k.namespaceMatcher.ReplaceAllString(string(data), "")
 }
 
 type KustomizeOption func(k *Kustomize)
@@ -114,6 +105,7 @@ func WithBaseFolder(folder string) func(k *Kustomize) {
 func WithNamespace(ns string) func(k *Kustomize) {
 	return func(k *Kustomize) {
 		k.Namespace = ns
+		k.namespaceMatcher = regexp.MustCompile(`.*(namespace:).*(` + ns + `).*\n`)
 	}
 }
 
