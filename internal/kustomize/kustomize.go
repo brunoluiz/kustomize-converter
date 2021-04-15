@@ -1,6 +1,7 @@
 package kustomize
 
 import (
+	"path"
 	"regexp"
 	"strings"
 
@@ -79,6 +80,7 @@ func (k *Kustomize) handle(path string, y []byte) {
 
 func (k *Kustomize) addResource(ypath string, data []byte) {
 	p := strings.ReplaceAll(ypath, k.baseFolder, ".")
+	p = path.Clean(p)
 
 	if _, ok := k.ResourcesData[p]; !ok {
 		k.Resources = append(k.Resources, p)
