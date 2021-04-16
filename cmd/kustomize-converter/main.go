@@ -1,3 +1,4 @@
+//nolint: lll
 package main
 
 import (
@@ -25,7 +26,6 @@ func main() {
 
 	app.Action = func(c *cli.Context) error {
 		k, err := loader.FromFS(c.String("folder"),
-			kustomize.WithBaseFolder(c.String("folder")),
 			kustomize.WithNamespace(c.String("namespace")),
 			kustomize.WithConfigsFolder(c.String("configs-folder")),
 			kustomize.WithSecretsFolder(c.String("secrets-folder")),

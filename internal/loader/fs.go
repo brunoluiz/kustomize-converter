@@ -10,8 +10,9 @@ import (
 	"github.com/brunoluiz/kustomize-converter/internal/kustomize"
 )
 
+// FromFS Load manifests from file system and generate a Kustomize instance
 func FromFS(folder string, opts ...kustomize.KustomizeOption) (*kustomize.Kustomize, error) {
-	k := kustomize.New(opts...)
+	k := kustomize.New(folder, opts...)
 
 	err := filepath.Walk(folder, func(path string, info os.FileInfo, e error) error {
 		if strings.Contains(path, "kustomization.") {

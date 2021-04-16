@@ -9,6 +9,8 @@ import (
 
 var supportedTypes = map[string]bool{"Secret": true, "ConfigMap": true}
 
+// YAML Return useful data about the YAML, which might decide how it will be
+// parsed by the Kustomize instance
 func YAML(data []byte) (out [][]byte, handleable bool, err error) {
 	yamls := bytes.Split(data, []byte("\n---"))
 

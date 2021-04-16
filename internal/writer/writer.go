@@ -10,15 +10,18 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// FS Implements a File system writer.
 type FS struct {
 	folder         string
 	clearProcessed bool
 }
 
+// ToFS Creates an instance of a File system writer.
 func ToFS(folder string, clearProcessed bool) FS {
 	return FS{folder: folder, clearProcessed: clearProcessed}
 }
 
+// Write Write Kustomize generated instance to disk.
 func (w FS) Write(k *kustomize.Kustomize) error {
 	if err := w.deleteResources(k.Processed); err != nil {
 		return err

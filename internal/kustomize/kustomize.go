@@ -12,21 +12,22 @@ import (
 )
 
 type Kustomize struct {
-	APIVersion       string            `yaml:"apiVersion" json:"apiVersion"`
-	Kind             string            `yaml:"kind" json:"kind"`
-	Namespace        string            `yaml:"namespace" json:"namespace"`
-	Secrets          []ConfigGenerator `yaml:"secretGenerator,omitempty" json:"secretGenerator,namespace"`
-	Configs          []ConfigGenerator `yaml:"configMapGenerator,omitempty" json:"configMapGenerator,omitempty"`
-	Resources        []string          `yaml:"resources,omitempty" json:"resources,omitempty"`
-	ResourcesData    map[string]string `yaml:"-" json:"-"`
-	Processed        []string          `yaml:"-" json:"-"`
-	deserializer     runtime.Decoder   `yaml:"-" json:"-"`
-	generators       bool              `yaml:"-" json:"-"`
-	processedLog     bool              `yaml:"-" json:"-"`
-	baseFolder       string            `yaml:"-" json:"-"`
-	secretsFolder    string            `yaml:"-" json:"-"`
-	configsFolder    string            `yaml:"-" json:"-"`
-	namespaceMatcher *regexp.Regexp    `yaml:"-" json:"-`
+	APIVersion string            `yaml:"apiVersion" json:"apiVersion"`
+	Kind       string            `yaml:"kind" json:"kind"`
+	Namespace  string            `yaml:"namespace" json:"namespace"`
+	Secrets    []ConfigGenerator `yaml:"secretGenerator,omitempty" json:"secretGenerator,namespace"`
+	Configs    []ConfigGenerator `yaml:"configMapGenerator,omitempty" json:"configMapGenerator,omitempty"`
+	Resources  []string          `yaml:"resources,omitempty" json:"resources,omitempty"`
+
+	ResourcesData    map[string]string
+	Processed        []string
+	deserializer     runtime.Decoder
+	generators       bool
+	processedLog     bool
+	baseFolder       string
+	secretsFolder    string
+	configsFolder    string
+	namespaceMatcher *regexp.Regexp
 }
 
 func (k *Kustomize) addProcessed(p string) {
@@ -36,6 +37,7 @@ func (k *Kustomize) addProcessed(p string) {
 	k.Processed = append(k.Processed, p)
 }
 
+// AddYAML Add and process an YAML kubernetes manifest
 func (k *Kustomize) AddYAML(ypath string, data []byte) error {
 	yamls, handleable, err := inspect.YAML(data)
 	if err != nil {
@@ -92,18 +94,16 @@ func (k *Kustomize) addResource(ypath string, data []byte) {
 
 type KustomizeOption func(k *Kustomize)
 
+// WithGenerators Configures if transformations should be applied to have Kustomize
+// configMap and secret generators.
 func WithGenerators(enabled bool) func(k *Kustomize) {
 	return func(k *Kustomize) {
 		k.generators = enabled
 	}
 }
 
-func WithBaseFolder(folder string) func(k *Kustomize) {
-	return func(k *Kustomize) {
-		k.baseFolder = folder
-	}
-}
-
+// WithNamespace Configures namespace where your resources live. It will be used to trim
+// it from existing resources and place into kustomization.yaml
 func WithNamespace(ns string) func(k *Kustomize) {
 	return func(k *Kustomize) {
 		k.Namespace = ns
@@ -111,25 +111,30 @@ func WithNamespace(ns string) func(k *Kustomize) {
 	}
 }
 
+// WithProcessedLog Keeps a log of already processed files. Later on, it might be useful for
+// cleaning processed files or just report it.
 func WithProcessedLog(c bool) func(k *Kustomize) {
 	return func(k *Kustomize) {
 		k.processedLog = c
 	}
 }
 
+// WithConfigsFolder Changes the default configs folder name (default: configs)
 func WithConfigsFolder(f string) func(k *Kustomize) {
 	return func(k *Kustomize) {
 		k.configsFolder = f
 	}
 }
 
+// WithSecretsFolder Changes the default secrets folder name (default: secrets)
 func WithSecretsFolder(f string) func(k *Kustomize) {
 	return func(k *Kustomize) {
 		k.secretsFolder = f
 	}
 }
 
-func New(opts ...KustomizeOption) *Kustomize {
+// New Returns a new Kustomize parser
+func New(baseFolder string, opts ...KustomizeOption) *Kustomize {
 	k := &Kustomize{
 		Kind:          "Kustomization",
 		APIVersion:    "kustomize.config.k8s.io/v1beta1",
@@ -141,6 +146,7 @@ func New(opts ...KustomizeOption) *Kustomize {
 		processedLog:  false,
 		secretsFolder: "secrets",
 		configsFolder: "configs",
+		baseFolder:    baseFolder,
 	}
 
 	for _, opt := range opts {

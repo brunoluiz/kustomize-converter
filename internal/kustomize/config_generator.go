@@ -8,35 +8,41 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+// ConfigGenerator Defines an instance of Kustomize ConfigGenerators (secret and configMap generator).
+// Contains not only the YAML/JSON fields, but as well the file and env data and helper methods.
 type ConfigGenerator struct {
-	Name     string            `yaml:"name" json:"name"`
-	Type     string            `yaml:"type,omitempty" json:"type,omitempty"`
-	Envs     []string          `yaml:"envs,omitempty" json:"envs,omitempty"`
-	Files    []string          `yaml:"files,omitempty" json:"files,omitempty"`
-	Path     string            `yaml:"-" json:"-"`
-	FileDir  string            `yaml:"-" json:"-"`
-	EnvData  map[string]string `yaml:"-" json:"-"`
-	FileData map[string]string `yaml:"-" json:"-"`
+	Name  string   `yaml:"name" json:"name"`
+	Type  string   `yaml:"type,omitempty" json:"type,omitempty"`
+	Envs  []string `yaml:"envs,omitempty" json:"envs,omitempty"`
+	Files []string `yaml:"files,omitempty" json:"files,omitempty"`
+
+	Path     string
+	FileDir  string
+	EnvData  map[string]string
+	FileData map[string]string
 }
 
-func (c *ConfigGenerator) Add(k, v string) {
+// Add Adds a config to the ConfigGenerator. If it is a multi-line content, it will be added to .Files
+// and .FileData. Otherwise, it will be added to .Env and .EnvData.
+func (c *ConfigGenerator) Add(k, content string) {
 	// If a file is multi-line, probably it is a file. Hence, add it to
 	// .Files and .FilesData, instead of .Env and .EnvsData
-	if strings.Contains(v, "\n") {
+	if strings.Contains(content, "\n") {
 		file := c.Name + "-" + strings.TrimPrefix(k, ".")
 		p := filepath.Join(c.Path, file)
-		c.FileData[p] = v
+		c.FileData[p] = content
 		c.Files = append(c.Files, k+"="+p)
 
 		return
 	}
 
-	c.EnvData[k] = v
+	c.EnvData[k] = content
 	if len(c.Envs) == 0 {
 		c.Envs = []string{filepath.Join(c.Path, c.Name)}
 	}
 }
 
+// GetEnv Parses and returns all env data in a nicely formatted string.
 func (c *ConfigGenerator) GetEnv() (s string) {
 	for k, v := range c.EnvData {
 		s += fmt.Sprintf("%s=%s\n", k, strings.ReplaceAll(v, "\n", `\n`))
