@@ -16,10 +16,10 @@ type ConfigGenerator struct {
 	Envs  []string `yaml:"envs,omitempty" json:"envs,omitempty"`
 	Files []string `yaml:"files,omitempty" json:"files,omitempty"`
 
-	Path     string
-	FileDir  string
-	EnvData  map[string]string
-	FileData map[string]string
+	Path     string            `yaml:"-" json:"-"`
+	FileDir  string            `yaml:"-" json:"-"`
+	EnvData  map[string]string `yaml:"-" json:"-"`
+	FileData map[string]string `yaml:"-" json:"-"`
 }
 
 // Add Adds a config to the ConfigGenerator. If it is a multi-line content, it will be added to .Files

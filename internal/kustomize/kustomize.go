@@ -19,8 +19,9 @@ type Kustomize struct {
 	Configs    []ConfigGenerator `yaml:"configMapGenerator,omitempty" json:"configMapGenerator,omitempty"`
 	Resources  []string          `yaml:"resources,omitempty" json:"resources,omitempty"`
 
-	ResourcesData    map[string]string
-	Processed        []string
+	ResourcesData map[string]string `yaml:"-" json:"-"`
+	Processed     []string          `yaml:"-" json:"-"`
+
 	deserializer     runtime.Decoder
 	generators       bool
 	processedLog     bool
