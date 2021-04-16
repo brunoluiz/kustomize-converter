@@ -20,8 +20,11 @@ type ConfigGenerator struct {
 }
 
 func (c *ConfigGenerator) Add(k, v string) {
+	// If a file is multi-line, probably it is a file. Hence, add it to
+	// .Files and .FilesData, instead of .Env and .EnvsData
 	if strings.Contains(v, "\n") {
-		p := filepath.Join(c.Path, c.Name+"-"+k)
+		file := c.Name + "-" + strings.TrimPrefix(k, ".")
+		p := filepath.Join(c.Path, file)
 		c.FileData[p] = v
 		c.Files = append(c.Files, k+"="+p)
 
