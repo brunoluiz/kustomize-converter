@@ -5,21 +5,17 @@ Converts Kubernetes YAML files to Kustomize
 ## Running
 
 ```
-Usage of kustomize-converter:
-  -clean
-        if set to true, it will clear up resources from source folder before generating output
-  -configs-folder string
-        which folder should the ConfigMaps be placed in the output folder (default "configs")
-  -folder string
-        kubernetes manifests source folder
-  -generators
-        if set to false, disable secret and configMapGenerator transforms (default true)
-  -namespace string
-        set a kubernetes namespace, instead of trying to infer from files
-  -output-folder string
-        kubernetes manifest output folder (can be the same as --folder)
-  -secrets-folder string
-        which folder should the Secrets be placed in the output folder (default "secrets")
+go run ./cmd/kustomize-converter <flags>
+
+Flags:
+   --folder value          kubernetes manifests source folder
+   --output-folder value   kubernetes manifest output folder (can be the same as --folder)
+   --namespace value       kubernetes namespace for this resources
+   --secrets-folder value  which folder should the ConfigMaps be placed in the output folder (default: "secrets")
+   --configs-folder value  which folder should the Secrets be placed in the output folder (default: "configs")
+   --clean                 if set to true, it will clear up resources from source folder before generating output (default: false)
+   --generators            if set to false, disable secret and configMapGenerator transforms (default: true)
+   --help, -h              show help (default: false)
 ```
 
 ## Output details
